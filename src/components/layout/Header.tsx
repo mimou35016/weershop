@@ -1,5 +1,9 @@
 "use client";
+import { logoutUser } from "@/actions/auth";
+import { User } from "@prisma/client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import React from "react";
 import { useEffect, useState } from "react";
 
 const AnnouncementBar = () => {
@@ -14,7 +18,11 @@ const AnnouncementBar = () => {
   );
 };
 
-const Header = () => {
+type HeaderProps = {
+  user: Omit<User, "passwordHash"> | null;
+};
+const Header = ({ user }: HeaderProps) => {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState<boolean>(true);
   const [prevScrollY, setPrevScrollY] = useState<number>(0);
   useEffect(() => {
@@ -67,7 +75,11 @@ const Header = () => {
                 <Link href="#">Sale</Link>
               </nav>
             </div>
-            <Link href="#">Link</Link>
+            <Link href="#" className=" absolute left-1/2 -translate-x-1/2">
+              <span className=" text-xl sm:text-2xl font-bold tracking-tight">
+                WeerShop
+              </span>
+            </Link>
 
             <div className=" flex flex-1 justify-end items-center gap-2 sm:gap-4">
               <button className=" text-gray-700 hover:text-gray-900 hidden sm:block">
@@ -86,8 +98,39 @@ const Header = () => {
                   />
                 </svg>
               </button>
-              <Link href="/auth/sign-in">Sign In</Link>
-              <Link href="/auth/sign-up">Sign Up</Link>
+              {user ? (
+                <div className="flex items-center gap-2 sm:gap-4">
+                  <span className="text-sm text-gray-700 hidden md:block">
+                    {user.email}
+                  </span>
+                  <Link
+                    href="#"
+                    className="text-xs sm:text-sm font-medium text-gray-700 hover:text-gray-900"
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      await logoutUser();
+                      router.refresh();
+                    }}
+                  >
+                    Sign Out
+                  </Link>
+                </div>
+              ) : (
+                <React.Fragment>
+                  <Link
+                    href="/auth/sign-in"
+                    className="text-xs sm:text-sm font-medium text-gray-700 hover:text-gray-900"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/auth/sign-up"
+                    className="text-xs sm:text-sm font-medium text-gray-700 hover:text-gray-900"
+                  >
+                    Sign Up
+                  </Link>
+                </React.Fragment>
+              )}
               <button className="text-gray-700 hover:text-gray-900 relative">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
